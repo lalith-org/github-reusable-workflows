@@ -2,7 +2,7 @@ name: continuous integration
 on: [workflow_call]
 jobs:
   CI_steps:
-    runs-on: self-hosted
+    runs-on: [self-hosted]
     steps:
       - name: code checkout
         uses: actions/checkout@v4
