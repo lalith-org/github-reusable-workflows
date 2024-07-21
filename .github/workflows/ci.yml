@@ -1,0 +1,26 @@
+name: continuous integration
+on: [workflow_call]
+jobs:
+  CI_steps:
+    runs-on: ubuntu-latest
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v4
+
+      - run: echo OK
+        name: code linting
+
+      - run: npm install
+        name: install nodeJS packages
+
+      - run: npm run test:unit
+        name: run tests
+
+      - run: npm run test:integration
+        name: integration testing
+
+      - run: echo OK
+        name: code review
+
+      - run: echo OK
+        name: release software
