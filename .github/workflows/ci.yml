@@ -1,11 +1,30 @@
-name: continuous integration
-on: [workflow_call]
+name: continuous integration - Reusable
+on:
+  workflow_call:
+    inputs:
+      project_name:
+        required: true
+        type: string
+    secrets:
+      vault_token:
+        required: true
 jobs:
   CI_steps:
     runs-on: [self-hosted]
     steps:
       - name: code checkout
         uses: actions/checkout@v4
+
+      - name: import vault secrets
+        id: vault-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault.vsldo.online:8200/
+          token: ${{ secrets.vault_token }}
+          tlsSkipVerify: true
+          secrets:  |
+            common/data/common sonarqube_user | sonarqube_user;
+            common/data/common sonarqube_password | sonarqube_password;
 
       - run: echo OK
         name: code linting
@@ -19,7 +38,7 @@ jobs:
       - run: echo OK
         name: run integration testing
 
-      - run: echo OK
+      - run: echo /opt/sonar-scanner-5.0.1.3006-linux/bin/sonar-scanner -Dsonar.host.url=http://sonarqube-internal.vsldo.online:9000 -Dsonar.projectKey=${{ inputs.project_name }} -Dsonar.qualitygate.wait=true - ${{ steps.vault-secrets.outputs.sonarqube_password }} >/tmp/1
         name: code review
 
       - run: echo OK
