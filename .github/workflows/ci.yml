@@ -2,6 +2,9 @@ name: continuous integration - Reusable
 on:
   workflow_call:
     inputs:
+      npm_install:
+        required: true
+        type: boolean
       project_name:
         required: true
         type: string
@@ -31,6 +34,7 @@ jobs:
 
       - run: npm install
         name: install nodeJS packages
+        if: ${{ inputs.npm_install==true }}
 
       - run: echo OK
         name: run unit tests
