@@ -1,0 +1,26 @@
+name: continuous integration - Reusable
+on:
+  workflow_call:
+    inputs:
+      npm_install:
+        required: true
+        type: boolean
+      project_name:
+        required: true
+        type: string
+    secrets:
+      vault_token:
+        required: true
+jobs:
+  CI_steps:
+    runs-on: [self-hosted]
+    steps:
+      - name: code checkout
+        uses: actions/checkout@v4
+
+      - run: echo npm install
+        name: Install NodeJS modules
+        if: ${{ inputs.npm_install }}
+
+      - run: echo OK
+        name: Release Software
