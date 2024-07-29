@@ -2,15 +2,15 @@ name: Release - Reusable
 on:
   workflow_call:
     inputs:
-      npm_install:
-        required: true
-        type: boolean
       project_name:
         required: true
         type: string
       release_archive_file:
         required: true
         type: string
+      npm_install:
+        required: true
+        type: boolean
     secrets:
       vault_token:
         required: true
