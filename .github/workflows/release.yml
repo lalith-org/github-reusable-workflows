@@ -1,4 +1,4 @@
-name: continuous integration - Reusable
+name: Release - Reusable
 on:
   workflow_call:
     inputs:
@@ -6,6 +6,9 @@ on:
         required: true
         type: boolean
       project_name:
+        required: true
+        type: string
+      release_archive_file:
         required: true
         type: string
     secrets:
@@ -18,9 +21,26 @@ jobs:
       - name: code checkout
         uses: actions/checkout@v4
 
-      - run: echo npm install
+      - run: npm install
         name: Install NodeJS modules
         if: ${{ inputs.npm_install }}
 
-      - run: echo OK
+      - name: import vault secrets
+        id: vault-secrets
+        uses: hashicorp/vault-action@v2
+        with:
+          url: https://vault.vsldo.online:8200/
+          token: ${{ secrets.vault_token }}
+          tlsSkipVerify: true
+          secrets: |
+            common/data/common artifactory_user | artifactory_user;
+            common/data/common artifactory_password | artifactory_password;
+
+      - name: creating a VERSION file
+        run: echo ${GITHUB_REF_NAME} > VERSION
+
+      - name: preparing a artifact .zip file
+        run: zip -r artifact.zip ${{inputs.release_archive_file}}
+
+      - run: curl -f -v --user ${{ steps.vault-secrets.outputs.artifactory_user }}:${{ steps.vault-secrets.outputs.artifactory_password }} --data-binary @artifact.zip -x PUT "http://artifactory-internal.vlsod.online:8081/artifactory/${{inputs.project_name}}/${{GITHUB_REF_NAME}}.zip"
         name: Release Software
